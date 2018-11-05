@@ -7,18 +7,13 @@ class Mutations::AcceptOffer < Mutations::BaseMutation
 
   def resolve(id:)
     offer = Offer.find(id)
-    OfferAcceptService.new(offer).process!
     order = offer.order
+    validate_seller_request!(order)
+    OfferAcceptService.new(offer).process!
     {
-      # order_or_error: { error: Types::ApplicationErrorType.from_application(e) }
       order_or_error: { order: order.reload }
     }
-    # validate_seller_request!(order)
-    # OrderApproveService.new(order, context[:current_user]['id']).process!
-    # {
-    #   order_or_error: { order: order.reload }
-    # }
-  # rescue Errors::ApplicationError => e
-    # { order_or_error: { error: Types::ApplicationErrorType.from_application(e) } }
+  rescue Errors::ApplicationError => e
+    { order_or_error: { error: Types::ApplicationErrorType.from_application(e) } }
   end
 end
