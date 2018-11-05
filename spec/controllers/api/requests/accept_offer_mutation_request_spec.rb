@@ -9,7 +9,7 @@ describe Api::GraphqlController, type: :request do
     let(:partner_id) { jwt_partner_ids.first }
     let(:user_id) { jwt_user_id }
     let(:credit_card_id) { 'cc-1' }
-    let(:order) { Fabricate(:order, state: Order::SUBMITTED) }
+    let(:order) { Fabricate(:order, state: Order::SUBMITTED, seller_id: partner_id, buyer_id: user_id) }
     let(:offer) { Fabricate(:offer, order: order) }
 
     let(:mutation) do
@@ -55,7 +55,16 @@ describe Api::GraphqlController, type: :request do
     end
 
     # TODO: come back to this
-    context 'with an invalid state transition'
+    context 'with an invalid state transition' do
+      let(:order) { Fabricate(:order, state: Order::PENDING) }
+
+      it 'returns invalid state transition error' do
+        response = client.execute(mutation, approve_order_input)
+        expect(response.data.accept_offer.order_or_error.error.type).to eq 'validation'
+        expect(response.data.accept_offer.order_or_error.error.code).to eq 'not_found'
+        expect(order.reload.state).to eq Order::PENDING
+      end
+    end
 
     context 'with user without permission to this partner' do
       let(:partner_id) { 'another-partner-id' }

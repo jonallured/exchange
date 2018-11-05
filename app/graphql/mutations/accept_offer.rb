@@ -8,6 +8,7 @@ class Mutations::AcceptOffer < Mutations::BaseMutation
   def resolve(id:)
     offer = Offer.find(id)
     order = offer.order
+    require 'pry'; binding.pry;
     validate_seller_request!(order)
     OfferAcceptService.new(offer).process!
     {
