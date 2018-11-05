@@ -29,6 +29,7 @@ gem 'taxjar-ruby', require: 'taxjar'
 
 group :development, :test do
   gem 'byebug'
+  gem 'pry'
   gem 'graphlient'
   gem 'rspec-rails'
   gem 'rubocop'
