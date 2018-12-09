@@ -12,6 +12,7 @@ module Offers
 
       @offer.order.reject!(@reject_reason)
       instrument_offer_reject
+      PostOrderNotificationJob.perform_later(@order.id, Order::CANCELED, nil)
     end
 
     private
