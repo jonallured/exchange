@@ -43,16 +43,16 @@ class Tax::CalculatorService
   private
 
   def fetch_sales_tax
-    response = @tax_client.tax_for_order(
-      construct_tax_params(
-        line_items: [{
-          unit_price: UnitConverter.convert_cents_to_dollars(@unit_price_cents),
-          quantity: @quantity
-        }]
-      )
+    params = construct_tax_params(
+      line_items: [{
+        unit_price: UnitConverter.convert_cents_to_dollars(@unit_price_cents),
+        quantity: @quantity
+      }]
     )
 
-    UnitConverter.convert_dollars_to_cents(response.amount_to_collect)
+    response = @tax_client.tax_for_order(params)
+    tax_in_dollars = response.amount_to_collect
+    UnitConverter.convert_dollars_to_cents(tax_in_dollars)
   end
 
   def construct_tax_params(args = {})
