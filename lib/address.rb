@@ -1,6 +1,7 @@
 class Address
   attr_reader :country, :region, :city, :street_line1, :street_line2, :postal_code
   UNITED_STATES = Carmen::Country.coded('US')
+  UNITED_KINGDOM = Carmen::Country.coded('GB')
   def initialize(address)
     @address = parse(address)
     @country = @address[:country]
@@ -22,6 +23,10 @@ class Address
 
   def united_states?
     @country == UNITED_STATES.code
+  end
+
+  def united_kingdom?
+    @country == UNITED_KINGDOM.code
   end
 
   # The "continental United States" is defined as any US state that isn't Alaska or Hawaii.

@@ -91,7 +91,7 @@ class Tax::CalculatorService
 
   def address_taxable?(address)
     # For the time being, we're only considering addresses in the United States to be taxable.
-    address.united_states?
+    address.united_states? || address.united_kingdom?
   end
 
   def validate_destination_address!(destination_address)
