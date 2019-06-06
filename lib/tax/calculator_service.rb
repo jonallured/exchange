@@ -29,7 +29,7 @@ class Tax::CalculatorService
   end
 
   def sales_tax
-    @sales_tax ||= UnitConverter.convert_dollars_to_cents(fetch_sales_tax.amount_to_collect)
+    @sales_tax ||= fetch_sales_tax
   rescue Taxjar::Error => e
     raise Errors::ProcessingError.new(:tax_calculator_failure, message: e.message)
   end
@@ -43,7 +43,7 @@ class Tax::CalculatorService
   private
 
   def fetch_sales_tax
-    @tax_client.tax_for_order(
+    response = @tax_client.tax_for_order(
       construct_tax_params(
         line_items: [{
           unit_price: UnitConverter.convert_cents_to_dollars(@unit_price_cents),
@@ -51,6 +51,8 @@ class Tax::CalculatorService
         }]
       )
     )
+
+    UnitConverter.convert_dollars_to_cents(response.amount_to_collect)
   end
 
   def construct_tax_params(args = {})
