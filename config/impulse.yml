@@ -1,0 +1,6 @@
+development: &default
+  admin_conversations_url: <%= "#{ENV['IMPULSE_URL'] || 'https://impulse-staging.artsy.net'}/admin/conversations" %>
+test:
+  <<: *default
+production:
+  <<: *default
