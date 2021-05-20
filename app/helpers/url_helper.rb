@@ -13,4 +13,9 @@ module UrlHelper
     partners_url = Rails.application.config_for(:vibrations)['partners_url']
     "#{partners_url}/#{partner_id}"
   end
+
+  def artsy_view_conversation_url(impulse_conversation_id)
+    impulse_conversations_url = Rails.application.config_for(:impulse)['admin_conversations_url']
+    "#{impulse_conversations_url}/#{impulse_conversation_id}"
+  end
 end

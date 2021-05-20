@@ -235,6 +235,10 @@ ActiveAdmin.register Order do
       attributes_table_for order do
         row :code
         row 'Type', &:mode
+        row 'Conversation' do |order|
+          conversation_id = order.impulse_conversation_id
+          link_to(conversation_id, artsy_view_conversation_url(conversation_id)) if conversation_id.present?
+        end
         row :state
         row 'Reason', &:state_reason
         row 'Last Updated At', &:updated_at
