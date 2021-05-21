@@ -48,7 +48,16 @@ module ARTA
           depth: artwork[:depth_cm],
           value: convert_to_dollars(list_price_cents),
           value_currency: artwork[:price_currency]
-        }.compact
+        }.merge(shipping_weight_and_metric(artwork)).compact
+      end
+
+      def shipping_weight_and_metric(artwork)
+        return {} unless artwork[:shipping_weight]
+
+        {
+          weight: artwork[:shipping_weight],
+          weight_unit: artwork[:shipping_weight_metric]
+        }
       end
 
       def format_artwork_type(artwork_category, framed)
