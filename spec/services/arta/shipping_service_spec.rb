@@ -15,8 +15,27 @@ describe ARTA::ShippingService do
       let(:line_item) { Fabricate(:line_item) }
 
       it 'persists the correct records' do
-        expect { described_class.generate_shipping_quotes(line_item: line_item) }.to change { ShippingQuote.count }.by(5)
-        expect { described_class.generate_shipping_quotes(line_item: line_item) }.to change { ShippingQuoteRequest.count }.by(1)
+        expect { described_class.new(line_item).generate_shipping_quotes }.to change { ShippingQuote.count }.by(5)
+        expect { described_class.new(line_item).generate_shipping_quotes }.to change { ShippingQuoteRequest.count }.by(1)
+      end
+    end
+  end
+
+  describe '.book_shipment' do
+    let(:response) do
+      JSON.parse(File.read('spec/support/fixtures/shipment_create_request_success_response.json'), { symbolize_names: true })
+    end
+
+    before do
+      allow(ARTA::Shipment).to receive(:create).and_return(response)
+    end
+
+    context 'success' do
+      let(:shipping_quote) { Fabricate(:shipping_quote) }
+      let(:line_item) { Fabricate(:line_item, selected_shipping_quote_id: shipping_quote.id) }
+
+      it 'persists the correct records' do
+        expect { described_class.new(line_item).book_shipment }.to change { Shipment.count }.by(1)
       end
     end
   end

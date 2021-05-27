@@ -89,6 +89,16 @@ describe ShippingCalculator, type: :services do
       end
     end
 
+    context 'with ship_arta fulfillment type' do
+      let!(:line_item) { Fabricate(:line_item, order: order, selected_shipping_quote_id: shipping_quote.id) }
+      let(:shipping_quote) { Fabricate(:shipping_quote, price_cents: 500) }
+      let(:fulfillment_type) { Order::SHIP_ARTA }
+
+      it 'returns price from Shipping Quote record' do
+        expect(ShippingCalculator.new(artwork, order).calculate).to eq 500
+      end
+    end
+
     context 'when artwork is consigned' do
       it 'returns 0' do
         artwork[:import_source] = 'convection'

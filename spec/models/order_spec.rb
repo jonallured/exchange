@@ -359,6 +359,32 @@ RSpec.describe Order, type: :model do
     end
   end
 
+  describe '.shipping_requested?' do
+    context 'when fulfillment_type is SHIP' do
+      let(:fulfillment_type) { Order::SHIP }
+
+      it 'returns true' do
+        expect(Order.shipping_requested?(fulfillment_type)).to eq true
+      end
+    end
+
+    context 'when fulfillment_type is SHIP_ARTA' do
+      let(:fulfillment_type) { Order::SHIP_ARTA }
+
+      it 'returns true' do
+        expect(Order.shipping_requested?(fulfillment_type)).to eq true
+      end
+    end
+
+    context 'when fulfillment_type is PICKUP' do
+      let(:fulfillment_type) { Order::PICKUP }
+
+      it 'returns true' do
+        expect(Order.shipping_requested?(fulfillment_type)).to eq false
+      end
+    end
+  end
+
   describe '#competing_orders' do
     context 'with an order that is not submitted' do
       it 'returns an empty array' do

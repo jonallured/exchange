@@ -13,9 +13,17 @@ class ShippingCalculator
 
     return if artwork[:location].blank? || !order.shipping_info?
 
-    cents = nil
+    determine_shipping_costs
+  end
 
-    if domestic? || eu_local_shipping?
+  private
+
+  def determine_shipping_costs
+    if shipping_with_arta?
+      raise Errors::ValidationError, :missing_shipping_quote unless shipping_quote
+
+      cents = shipping_quote.price_cents
+    elsif domestic? || eu_local_shipping?
       cents = artwork[:domestic_shipping_fee_cents]
       raise Errors::ValidationError, :missing_domestic_shipping_fee if cents.blank? && !order.inquiry_order?
     else
@@ -26,7 +34,14 @@ class ShippingCalculator
     cents
   end
 
-  private
+  def shipping_quote
+    @shipping_quote ||= ShippingQuote.find(@order.line_items.last.selected_shipping_quote_id)
+  end
+
+  def shipping_with_arta?
+    @order.fulfillment_type == Order::SHIP_ARTA &&
+      @order.line_items.last&.selected_shipping_quote_id
+  end
 
   def consignment?
     artwork[:import_source] == 'convection'

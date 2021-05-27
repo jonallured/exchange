@@ -40,6 +40,35 @@ class OrderShipping
     end
   end
 
+  def ship_with_arta!(shipping_info, buyer_phone_number)
+    @shipping_address = Address.new(shipping_info)
+    raise Errors::ValidationError, :missing_country if @shipping_address&.country.blank?
+
+    @order.update!(
+      fulfillment_type: Order::SHIP_ARTA,
+      buyer_phone_number: buyer_phone_number,
+      shipping_name: shipping_info[:name],
+      shipping_address_line1: @shipping_address&.street_line1,
+      shipping_address_line2: @shipping_address&.street_line2,
+      shipping_city: @shipping_address&.city,
+      shipping_region: @shipping_address&.region,
+      shipping_country: @shipping_address&.country,
+      shipping_postal_code: @shipping_address&.postal_code
+    )
+
+    ARTA::ShippingService.new(@order.line_items.first).generate_shipping_quotes
+  end
+
+  def select_arta_shipment_option!(selected_shipping_quote_id)
+    raise Errors::ValidationError, :missing_selected_shipping_quote_id if selected_shipping_quote_id.blank?
+
+    @order.with_lock do
+      @order.line_items.last.update(selected_shipping_quote_id: selected_shipping_quote_id)
+
+      update_totals!
+    end
+  end
+
   private
 
   def update_totals!

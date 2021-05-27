@@ -78,7 +78,8 @@ class Tax::CalculatorService
   def destination_address
     @destination_address ||=
       begin
-        address = @fulfillment_type == Order::SHIP ? @shipping_address : @artwork_location
+        address = Order.shipping_requested?(@fulfillment_type) ? @shipping_address : @artwork_location
+
         validate_destination_address!(address)
         address
       rescue Errors::ValidationError => e

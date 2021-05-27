@@ -49,6 +49,22 @@ describe LineItemTotals do
         expect(line_item_totals.shipping_total_cents).to eq 300
       end
     end
+
+    context 'SHIP_ARTA' do
+      let(:fulfillment_type) { Order::SHIP_ARTA }
+      before do
+        order.update!(shipping_name: 'a', shipping_address_line1: 'line1', shipping_city: 'city', shipping_country: 'US', buyer_phone_number: '12312')
+        allow_any_instance_of(ShippingCalculator).to receive(:calculate).and_return 100
+      end
+
+      it 'returns 100' do
+        expect(line_item_totals.shipping_total_cents).to eq 100
+      end
+      it 'returns shipping total * quantity' do
+        line_item.update!(quantity: 3)
+        expect(line_item_totals.shipping_total_cents).to eq 300
+      end
+    end
   end
 
   describe 'tax_total_cents' do

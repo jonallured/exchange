@@ -33,10 +33,16 @@ class BuyOrderTotals
   def seller_total_cents
     return unless buyer_total_cents && commission_fee_cents && transaction_fee_cents
 
-    @seller_total_cents ||= buyer_total_cents - commission_fee_cents - transaction_fee_cents - calculate_remittable_sales_tax
+    @seller_total_cents ||= buyer_total_cents - commission_fee_cents - transaction_fee_cents - calculate_remittable_sales_tax - adjustment_for_arta_shipping
   end
 
   private
+
+  def adjustment_for_arta_shipping
+    return 0 unless @order.fulfillment_type == Order::SHIP_ARTA
+
+    shipping_total_cents.to_i
+  end
 
   def calculate_remittable_sales_tax
     @order.line_items.select(&:should_remit_sales_tax).sum(&:sales_tax_cents)

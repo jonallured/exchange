@@ -9,6 +9,9 @@ class LineItem < ApplicationRecord
 
   has_many :shipping_quote_requests, dependent: :destroy
   has_many :shipping_quotes, through: :shipping_quote_requests
+  has_one :shipment, dependent: :destroy
+
+  belongs_to :selected_shipping_quote, class_name: :ShippingQuote, optional: true
 
   validate :offer_order_lacks_line_items, on: :create
 

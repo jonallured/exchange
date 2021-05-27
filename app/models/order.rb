@@ -65,7 +65,8 @@ class Order < ApplicationRecord
 
   FULFILLMENT_TYPES = [
     PICKUP = 'pickup'.freeze,
-    SHIP = 'ship'.freeze
+    SHIP = 'ship'.freeze,
+    SHIP_ARTA = 'ship_arta'.freeze
   ].freeze
 
   ACTIONS = %i[abandon revert submit approve reject fulfill seller_lapse buyer_lapse refund].freeze
@@ -145,7 +146,7 @@ class Order < ApplicationRecord
 
   def shipping_info?
     fulfillment_type == PICKUP ||
-      (fulfillment_type == SHIP && complete_shipping_details?)
+      (Order.shipping_requested?(fulfillment_type) && complete_shipping_details?)
   end
 
   def payment_info?
@@ -180,8 +181,12 @@ class Order < ApplicationRecord
     OrderHistoryService.events_for(order_id: id)
   end
 
+  def self.shipping_requested?(fulfillment_type)
+    [Order::SHIP, Order::SHIP_ARTA].include?(fulfillment_type)
+  end
+
   def shipping_address
-    return unless fulfillment_type == Order::SHIP
+    return unless Order.shipping_requested?(fulfillment_type)
 
     Address.new(
       country: shipping_country,

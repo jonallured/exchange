@@ -5,12 +5,36 @@ describe BuyOrderTotals do
   let(:fulfillment_type) { Order::PICKUP }
   let(:gravity_artwork) { gravity_v1_artwork(_id: 'a-1', price_listed: 1000.00, edition_sets: [], domestic_shipping_fee_cents: 200_00, international_shipping_fee_cents: 300_00) }
   let(:order) { Fabricate(:order, seller_id: 'partner-1', seller_type: 'gallery', buyer_id: 'buyer1', buyer_type: Order::USER, fulfillment_type: fulfillment_type, commission_rate: 0.8) }
-  let!(:line_item1) { Fabricate(:line_item, order: order, quantity: 1, list_price_cents: 1000_00, artwork_id: 'a-1', artwork_version_id: '1', sales_tax_cents: 0, shipping_total_cents: 0, commission_fee_cents: 800_00) }
+  let!(:line_item1) { Fabricate(:line_item, order: order, quantity: 1, list_price_cents: 1000_00, artwork_id: 'a-1', artwork_version_id: '1', sales_tax_cents: 0, shipping_total_cents: 1000, commission_fee_cents: 800_00) }
   let(:line_item2) { Fabricate(:line_item, order: order, quantity: 1, list_price_cents: 2000_00, artwork_id: 'a-3', artwork_version_id: '1', sales_tax_cents: 0, shipping_total_cents: 0, commission_fee_cents: 1600_00) }
 
   before do
     allow(Adapters::GravityV1).to receive(:get).with('/artwork/a-1').and_return(gravity_artwork)
     allow(Adapters::GravityV1).to receive(:get).with('/partner/partner-1/all').and_return(gravity_v1_partner)
+  end
+
+  describe 'seller_total_cents' do
+    context 'when shipping with arta' do
+      let(:fulfillment_type) { Order::SHIP_ARTA }
+
+      context 'when shipping_total_cents is 1000' do
+        it 'subtracts shipping_total_cents from seller_total_cents' do
+          buy_order_totals = BuyOrderTotals.new(order)
+          expect(buy_order_totals.seller_total_cents).to eq(160_31)
+        end
+      end
+    end
+
+    context 'when using flat rate shipping' do
+      let(:fulfillment_type) { Order::SHIP }
+
+      context 'when shipping_total_cents is 1000' do
+        it 'includes shipping_total_cents in seller_total_cents' do
+          buy_order_totals = BuyOrderTotals.new(order)
+          expect(buy_order_totals.seller_total_cents).to eq(170_31)
+        end
+      end
+    end
   end
 
   describe 'commission_fee_cents' do

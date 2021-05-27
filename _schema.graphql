@@ -1005,6 +1005,11 @@ enum OrderFulfillmentTypeEnum {
   fulfillment type is: ship
   """
   SHIP
+
+  """
+  fulfillment type is: ship_arta
+  """
+  SHIP_ARTA
 }
 
 enum OrderModeEnum {

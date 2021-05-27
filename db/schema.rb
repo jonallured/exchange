@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_04_20_175055) do
-
+ActiveRecord::Schema.define(version: 2021_05_11_214254) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -104,7 +103,9 @@ ActiveRecord::Schema.define(version: 2021_04_20_175055) do
     t.string "sales_tax_transaction_id"
     t.bigint "commission_fee_cents"
     t.bigint "shipping_total_cents"
+    t.uuid "selected_shipping_quote_id"
     t.index ["order_id"], name: "index_line_items_on_order_id"
+    t.index ["selected_shipping_quote_id"], name: "index_line_items_on_selected_shipping_quote_id"
   end
 
   create_table "offer_versions", force: :cascade do |t|
@@ -195,6 +196,20 @@ ActiveRecord::Schema.define(version: 2021_04_20_175055) do
     t.index ["state"], name: "index_orders_on_state"
   end
 
+  create_table "shipments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "line_item_id"
+    t.bigint "price_cents", null: false
+    t.string "price_currency", null: false
+    t.integer "external_id", null: false
+    t.jsonb "response_payload"
+    t.string "internal_reference"
+    t.string "public_reference"
+    t.string "booked_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["line_item_id"], name: "index_shipments_on_line_item_id"
+  end
+
   create_table "shipping_quote_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "line_item_id"
     t.string "external_id", null: false
@@ -266,6 +281,7 @@ ActiveRecord::Schema.define(version: 2021_04_20_175055) do
   add_foreign_key "offers", "offers", column: "responds_to_id"
   add_foreign_key "offers", "orders"
   add_foreign_key "orders", "offers", column: "last_offer_id"
+  add_foreign_key "shipments", "line_items"
   add_foreign_key "shipping_quote_requests", "line_items"
   add_foreign_key "shipping_quotes", "shipping_quote_requests"
   add_foreign_key "state_histories", "orders"

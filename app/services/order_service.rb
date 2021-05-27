@@ -22,14 +22,20 @@ module OrderService
 
   def self.set_shipping!(order, fulfillment_type:, shipping:, phone_number:)
     raise Errors::ValidationError, :invalid_state unless order.state == Order::PENDING
-    raise Errors::ValidationError, :missing_phone_number if fulfillment_type == Order::SHIP && phone_number.nil?
+    raise Errors::ValidationError, :missing_phone_number if Order.shipping_requested?(fulfillment_type) && phone_number.nil?
 
     order_shipping = OrderShipping.new(order)
     case fulfillment_type
     when Order::PICKUP then order_shipping.pickup!(phone_number)
     when Order::SHIP then order_shipping.ship!(shipping, phone_number)
+    when Order::SHIP_ARTA then order_shipping.ship_with_arta!(shipping, phone_number)
     end
     order
+  end
+
+  def self.select_arta_shipment_option!(order, selected_shipping_quote_id:)
+    order_shipping = OrderShipping.new(order)
+    order_shipping.select_arta_shipment_option!(selected_shipping_quote_id)
   end
 
   def self.set_payment!(order, credit_card_id)

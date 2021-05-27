@@ -32,6 +32,8 @@ module Errors
       missing_partner_location
       missing_postal_code
       missing_price
+      missing_selected_shipping_quote_id
+      missing_shipping_quote
       missing_region
       missing_required_info
       missing_required_param
